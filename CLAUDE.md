@@ -4,7 +4,11 @@
 HopMetrics is a web application that scrapes beer menu data from restaurants and bars to help users find the best "bang for your buck" beers, ranked by alcohol content per dollar.
 
 ## Version
-v1.0.0 - Initial release with BeerMenus.com and BeerAdvocate integration
+v1.0.1 - Fixed Docker build issues and updated dependencies
+
+### Changelog
+- v1.0.1: Fixed Docker build errors, updated dependencies to latest versions, removed obsolete docker-compose version field
+- v1.0.0: Initial release with BeerMenus.com and BeerAdvocate integration
 
 ## Architecture
 
