@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Place - HopMetrics</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FFA500, #FF6347);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links {
+            margin: 1rem 0;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #FFA500;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .establishments-list {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .establishment-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .establishment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .establishment-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .establishment-url {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .last-scraped {
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        .flash-messages {
+            margin-bottom: 1rem;
+        }
+        
+        .flash-message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .example-urls {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+        
+        .example-urls h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .example-urls ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .example-urls li {
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍺 Add New Place</h1>
+        <p>Add a restaurant or bar to scrape beer data from</p>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/scrape">Add New Place</a>
+            <a href="/establishments">All Places</a>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message flash-success">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="name">Restaurant/Bar Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g., Bavarian Lodge">
+            </div>
+            
+            <div class="form-group">
+                <label for="url">BeerMenus URL *</label>
+                <input type="url" id="url" name="url" required placeholder="https://www.beermenus.com/places/1239-bavarian-lodge">
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location (optional)</label>
+                <input type="text" id="location" name="location" placeholder="e.g., Lisle, IL">
+            </div>
+            
+            <button type="submit" class="submit-btn">🍺 Scrape Beer Data</button>
+        </form>
+        
+        <div class="example-urls">
+            <h4>Example URLs:</h4>
+            <ul>
+                <li>https://www.beermenus.com/places/1239-bavarian-lodge</li>
+                <li>https://www.beermenus.com/places/[place-id]-[place-name]</li>
+            </ul>
+            <p><strong>Note:</strong> Currently optimized for BeerMenus.com. Other sites may work but with limited data extraction.</p>
+        </div>
+    </div>
+    
+    {% if establishments %}
+    <div class="establishments-list">
+        <h3>Recently Added Places</h3>
+        {% for est in establishments %}
+        <div class="establishment-item">
+            <div>
+                <div class="establishment-name">{{ est[0] }}</div>
+                <div class="establishment-url">{{ est[1] }}</div>
+                {% if est[2] %}
+                    <div class="establishment-url">{{ est[2] }}</div>
+                {% endif %}
+            </div>
+            <div class="last-scraped">
+                {% if est[3] %}
+                    Last scraped: {{ est[3][:16] }}
+                {% else %}
+                    Never scraped
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Places - HopMetrics</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FFA500, #FF6347);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links {
+            margin: 1rem 0;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .establishments-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .establishment-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .establishment-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .establishment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .establishment-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+        
+        .beer-count {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .establishment-details {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .establishment-url {
+            word-break: break-all;
+            color: #007bff;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .establishment-url:hover {
+            text-decoration: underline;
+        }
+        
+        .establishment-location {
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        
+        .last-scraped {
+            color: #999;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        
+        .no-establishments {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFA500;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍺 All Places</h1>
+        <p>Manage your tracked restaurants and bars</p>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/scrape">Add New Place</a>
+            <a href="/establishments">All Places</a>
+        </div>
+    </div>
+    
+    <div class="establishments-container">
+        {% if establishments %}
+            <div class="stats-summary">
+                <h3>Summary</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ establishments|length }}</div>
+                        <div class="stat-label">Total Places</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ establishments|sum(attribute=4) }}</div>
+                        <div class="stat-label">Total Beers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ (establishments|selectattr(3)|list)|length }}</div>
+                        <div class="stat-label">Scraped Places</div>
+                    </div>
+                </div>
+            </div>
+            
+            {% for est in establishments %}
+            <div class="establishment-card">
+                <div class="establishment-header">
+                    <h2 class="establishment-name">{{ est[0] }}</h2>
+                    <div class="beer-count">{{ est[4] }} beers</div>
+                </div>
+                
+                <div class="establishment-details">
+                    <a href="{{ est[1] }}" target="_blank" class="establishment-url">{{ est[1] }}</a>
+                    {% if est[2] %}
+                        <div class="establishment-location">📍 {{ est[2] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="last-scraped">
+                    {% if est[3] %}
+                        Last scraped: {{ est[3][:16] }}
+                    {% else %}
+                        Never scraped
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+        {% else %}
+            <div class="no-establishments">
+                <h2>No places added yet!</h2>
+                <p>Click "Add New Place" to start tracking beer menus.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
