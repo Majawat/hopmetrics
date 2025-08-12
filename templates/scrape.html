@@ -176,10 +176,11 @@
 <body>
     <div class="header">
         <h1>🍺 Add New Place</h1>
-        <p>Add a restaurant or bar to scrape beer data from</p>
+        <p>Automatically extract beer data from BeerMenus.com URLs</p>
         <div class="nav-links">
             <a href="/">Home</a>
-            <a href="/scrape">Add New Place</a>
+            <a href="/scrape">Auto-Scrape</a>
+            <a href="/manual">Manual Entry</a>
             <a href="/establishments">All Places</a>
         </div>
     </div>
@@ -197,21 +198,14 @@
         
         <form method="POST">
             <div class="form-group">
-                <label for="name">Restaurant/Bar Name *</label>
-                <input type="text" id="name" name="name" required placeholder="e.g., Bavarian Lodge">
-            </div>
-            
-            <div class="form-group">
                 <label for="url">BeerMenus URL *</label>
                 <input type="url" id="url" name="url" required placeholder="https://www.beermenus.com/places/1239-bavarian-lodge">
+                <small style="color: #666; display: block; margin-top: 0.5rem;">
+                    Just paste the URL - we'll automatically extract the name, location, and other details!
+                </small>
             </div>
             
-            <div class="form-group">
-                <label for="location">Location (optional)</label>
-                <input type="text" id="location" name="location" placeholder="e.g., Lisle, IL">
-            </div>
-            
-            <button type="submit" class="submit-btn">🍺 Scrape Beer Data</button>
+            <button type="submit" class="submit-btn">🍺 Auto-Scrape This Place</button>
         </form>
         
         <div class="example-urls">
@@ -220,7 +214,7 @@
                 <li>https://www.beermenus.com/places/1239-bavarian-lodge</li>
                 <li>https://www.beermenus.com/places/[place-id]-[place-name]</li>
             </ul>
-            <p><strong>Note:</strong> Currently optimized for BeerMenus.com. Other sites may work but with limited data extraction.</p>
+            <p><strong>Note:</strong> If no beer data is found, the menu likely loads with JavaScript. Use <a href="/manual">Manual Entry</a> instead!</p>
         </div>
     </div>
     

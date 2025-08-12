@@ -87,6 +87,9 @@ Value Score = (Volume in oz × ABV%) ÷ Price
 - Volume estimation when missing from BeerMenus
 - Focus on US establishments (BeerMenus coverage)
 
+### Development Philosophy
+- Focus on proper solutions to problems and features, never quick fixes
+
 ### Testing
 - Test establishment: Bavarian Lodge (BeerMenus ID: 1239)
 - URL: https://www.beermenus.com/places/1239-bavarian-lodge

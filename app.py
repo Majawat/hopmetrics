@@ -101,22 +101,24 @@ def api_beers():
 
 @app.route('/scrape', methods=['GET', 'POST'])
 def scrape_page():
-    """Page for manual scraping."""
+    """Page for URL-based scraping."""
     if request.method == 'POST':
-        name = request.form.get('name')
         url = request.form.get('url')
-        location = request.form.get('location', '')
         
-        if not name or not url:
-            flash('Name and URL are required!')
+        if not url:
+            flash('URL is required!')
             return redirect(url_for('scrape_page'))
         
         try:
             scraper = BeerScraper()
-            beer_count = scraper.scrape_establishment(name, url, location)
-            flash(f'Successfully scraped {beer_count} beers from {name}!')
+            beer_count, establishment_info = scraper.scrape_establishment(url)
+            
+            if beer_count > 0:
+                flash(f'Successfully scraped {beer_count} beers from {establishment_info["name"]}!')
+            else:
+                flash(f'Found establishment "{establishment_info["name"]}" but no beer data available. This usually means the menu loads with JavaScript - try the Manual Entry option instead.')
         except Exception as e:
-            flash(f'Error scraping {name}: {str(e)}')
+            flash(f'Error scraping: {str(e)}')
         
         return redirect(url_for('index'))
     
@@ -147,6 +149,69 @@ def establishments():
     conn.close()
     
     return render_template('establishments.html', establishments=establishments)
+
+@app.route('/manual', methods=['GET', 'POST'])
+def manual_entry():
+    """Manual beer entry interface."""
+    if request.method == 'POST':
+        establishment_name = request.form.get('establishment_name')
+        establishment_url = request.form.get('establishment_url', '')
+        establishment_location = request.form.get('establishment_location', '')
+        
+        beer_names = request.form.getlist('beer_names[]')
+        beer_volumes = request.form.getlist('beer_volumes[]')
+        beer_abvs = request.form.getlist('beer_abvs[]')
+        beer_prices = request.form.getlist('beer_prices[]')
+        
+        if not establishment_name or not beer_names:
+            flash('Establishment name and at least one beer are required!')
+            return redirect(url_for('manual_entry'))
+        
+        try:
+            conn = sqlite3.connect('hopmetrics.db')
+            cursor = conn.cursor()
+            
+            # Add establishment
+            cursor.execute('''
+                INSERT OR REPLACE INTO establishments (name, url, location, last_scraped)
+                VALUES (?, ?, ?, ?)
+            ''', (establishment_name, establishment_url, establishment_location, datetime.now()))
+            
+            establishment_id = cursor.lastrowid or cursor.execute(
+                'SELECT id FROM establishments WHERE name = ?', (establishment_name,)
+            ).fetchone()[0]
+            
+            # Clear old beers for this establishment
+            cursor.execute('DELETE FROM beers WHERE establishment_id = ?', (establishment_id,))
+            
+            # Add beers
+            beer_count = 0
+            for i in range(len(beer_names)):
+                if i < len(beer_volumes) and i < len(beer_abvs) and i < len(beer_prices):
+                    name = beer_names[i].strip()
+                    volume = float(beer_volumes[i]) if beer_volumes[i] else 12.0
+                    abv = float(beer_abvs[i]) if beer_abvs[i] else 5.0
+                    price = float(beer_prices[i]) if beer_prices[i] else 6.0
+                    
+                    if name:  # Only add if name is provided
+                        value_score = (volume * abv) / price
+                        cursor.execute('''
+                            INSERT INTO beers (establishment_id, name, volume_oz, abv, price, value_score)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (establishment_id, name, volume, abv, price, value_score))
+                        beer_count += 1
+            
+            conn.commit()
+            conn.close()
+            
+            flash(f'Successfully added {beer_count} beers to {establishment_name}!')
+            return redirect(url_for('index'))
+            
+        except Exception as e:
+            flash(f'Error saving data: {str(e)}')
+            return redirect(url_for('manual_entry'))
+    
+    return render_template('manual_entry.html')
 
 if __name__ == '__main__':
     app.secret_key = 'hopmetrics-secret-key-change-in-production'

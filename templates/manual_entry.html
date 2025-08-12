@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Beer Entry - HopMetrics</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FFA500, #FF6347);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links {
+            margin: 1rem 0;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .help-text {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: end;
+        }
+        
+        .form-row input {
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .form-row input:focus {
+            outline: none;
+            border-color: #FFA500;
+        }
+        
+        .form-row label {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        .add-row-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .remove-row-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2rem;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .beer-rows {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            font-weight: bold;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #333;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍺 Manual Beer Entry</h1>
+        <p>Add beers manually when automatic scraping doesn't work</p>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/scrape">Add New Place</a>
+            <a href="/establishments">All Places</a>
+            <a href="/manual">Manual Entry</a>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <div class="help-text">
+            <strong>🎯 How to use:</strong> Copy beer data from BeerMenus.com and paste it here. 
+            Format: "Beer Name", "Volume (like 16oz)", "ABV% (like 5.2)", "Price (like 7.50)". 
+            You can add multiple rows and we'll calculate the value scores automatically!
+        </div>
+        
+        <form method="POST">
+            <div class="form-row">
+                <label for="establishment_name">Establishment Name *</label>
+                <label for="establishment_url">BeerMenus URL</label>
+                <label for="establishment_location">Location</label>
+                <label></label>
+            </div>
+            <div class="form-row">
+                <input type="text" name="establishment_name" required placeholder="e.g., Bavarian Lodge">
+                <input type="url" name="establishment_url" placeholder="https://www.beermenus.com/places/...">
+                <input type="text" name="establishment_location" placeholder="e.g., Lisle, IL">
+                <button type="button" onclick="addBeerRow()" class="add-row-btn">+ Add Beer</button>
+            </div>
+            
+            <h3>Beer List</h3>
+            <div class="header-row">
+                <div>Beer Name</div>
+                <div>Volume (oz)</div>
+                <div>ABV %</div>
+                <div>Price $</div>
+                <div>Action</div>
+            </div>
+            
+            <div class="beer-rows" id="beerRows">
+                <!-- Beer rows will be added here -->
+            </div>
+            
+            <button type="submit" class="submit-btn">💾 Save All Beers</button>
+        </form>
+    </div>
+    
+    <script>
+        let beerCount = 0;
+        
+        function addBeerRow() {
+            beerCount++;
+            const beerRows = document.getElementById('beerRows');
+            const row = document.createElement('div');
+            row.className = 'form-row';
+            row.id = `beer-${beerCount}`;
+            row.innerHTML = `
+                <input type="text" name="beer_names[]" placeholder="e.g., Guinness Draught" required>
+                <input type="number" name="beer_volumes[]" placeholder="16" step="0.1" required>
+                <input type="number" name="beer_abvs[]" placeholder="4.2" step="0.1" required>
+                <input type="number" name="beer_prices[]" placeholder="6.50" step="0.01" required>
+                <button type="button" onclick="removeBeerRow(${beerCount})" class="remove-row-btn">✕</button>
+            `;
+            beerRows.appendChild(row);
+        }
+        
+        function removeBeerRow(id) {
+            const row = document.getElementById(`beer-${id}`);
+            if (row) {
+                row.remove();
+            }
+        }
+        
+        // Add initial rows
+        addBeerRow();
+        addBeerRow();
+        addBeerRow();
+    </script>
+</body>
+</html>
